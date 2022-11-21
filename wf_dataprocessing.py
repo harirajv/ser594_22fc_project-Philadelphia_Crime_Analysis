@@ -1,39 +1,49 @@
 import pandas as pd
-import os
-import nltk
-from nltk.corpus import stopwords
-from nltk.tokenize import word_tokenize
-from nltk.stem import WordNetLemmatizer
+from sklearn.compose import make_column_transformer
+from sklearn.impute import KNNImputer
+from sklearn.preprocessing import LabelEncoder
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import MinMaxScaler
 
+# Fields metadata - https://cityofphiladelphia.github.io/carto-api-explorer/#incidents_part1_part2
 def processing(data):
-    # Remove empty features
-    empty_features = list(data.columns[data.isnull().all()])
+    date_column = pd.to_datetime(data["dispatch_date"])
+    data["dispatch_day_name"] = date_column.dt.day_name()
+    data["dispatch_day"] = date_column.dt.day
+    data["dispatch_month"] = date_column.dt.month
+    data["dispatch_time_seconds"] = pd.to_timedelta(data['dispatch_time']).dt.total_seconds()
 
-    for col in empty_features:
-        data.drop(col, axis=1, inplace=True)
+    data["psa"] = data["psa"].fillna("Unknown")
 
-    datetime_columns = ["created_at", "date"]
+    latitude_imputer = KNNImputer(n_neighbors=5)
+    data["lat"] = latitude_imputer.fit_transform(data["lat"].to_frame())
 
-    for col in datetime_columns:
-        data[col] = pd.to_datetime(data[col])
+    longitude_imputer = KNNImputer(n_neighbors=5)
+    data["lng"] = longitude_imputer.fit_transform(data["lng"].to_frame())
 
-    for col in datetime_columns:
-        data['time'] = pd.to_timedelta(data.time).dt.total_seconds()
+    le = LabelEncoder()
+    data["crime_code"] = le.fit_transform(data["text_general_code"])
 
-    data = data.loc[(data.date>='2021-01-01') & (data.date<='2021-06-30')]
+    for feature in ["dispatch_day", "dispatch_month", "dispatch_time_seconds"]:
+        min_max_scaler = MinMaxScaler()
+        data[feature] = min_max_scaler.fit_transform(data[feature].to_frame())
 
-    data['tweet'] = data.tweet.str.lower()
-    data = data.replace(to_replace=r'[^\w\s]', value='', regex=True)
+    for feature in ["lat", "lng"]:
+        min_max_scaler = MinMaxScaler(feature_range=(-1,1))
+        data[feature] = min_max_scaler.fit_transform(data[feature].to_frame())
 
-    data['tokens']=data.tweet.apply(word_tokenize)
-
-    stopwords_set = set(stopwords.words('english'))
-    data['tokens'] = data.tokens.apply(lambda token_words:[word for word in token_words if word not in stopwords_set])
-
-    wnl = WordNetLemmatizer()
-    data['cleaned_tokens'] = data.tokens.apply(lambda tokens:[wnl.lemmatize(token) for token in tokens])
-    data['cleaned_tweet'] = data.cleaned_tokens.apply(lambda tokens:" ".join(tokens))
-
-    data.index += 1
+    for feature in ["dispatch_day_name", "psa", "dc_dist"]:
+        transformer = make_column_transformer(
+            (OneHotEncoder(), [feature]),
+            remainder='passthrough',
+            verbose_feature_names_out=False
+        )
+        transformed = transformer.fit_transform(data)
+        col_names = list(data.columns)
+        col_names.remove(feature)
+        data = pd.DataFrame(
+            transformed,
+            columns=transformer.get_feature_names_out()
+        )
 
     return data

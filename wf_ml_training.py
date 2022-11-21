@@ -1,8 +1,5 @@
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.linear_model import SGDClassifier
-from sklearn.preprocessing import StandardScaler
-from sklearn.pipeline import make_pipeline
 import os
 import pickle
 
@@ -32,21 +29,4 @@ def create_models(X, y):
         pickle.dump(knn_model_8, knn_file_8)
         pickle.dump(knn_model_10, knn_file_10)
         pickle.dump(knn_model_14, knn_file_14)
-        pickle.dump(rf_model, rf_file)
-
-
-def create_knn_model(X, y, neighb=10):
-    knn_model = KNeighborsClassifier(n_neighbors=neighb)
-    knn_model.fit(X, y)
-
-    with open(f'models/knn_model_{neighb}.pkl', "wb") as knn_file, open(
-            "models/rf_model.pkl", "wb") as rf_file:
-        pickle.dump(knn_model, knn_file)
-
-
-def create_rf_model(X, y):
-    rf_model = RandomForestClassifier(n_estimators=200, max_depth=32, random_state=0)
-    rf_model.fit(X, y)
-
-    with open("models/rf_model.pkl", "wb") as rf_file:
         pickle.dump(rf_model, rf_file)

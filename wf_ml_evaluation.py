@@ -5,8 +5,8 @@ from sklearn.metrics import accuracy_score
 from sklearn.metrics import precision_score
 from sklearn.metrics import f1_score
 from sklearn.model_selection import train_test_split
-from wf_ml_training import create_models, create_knn_model, create_rf_model
-from wf_ml_prediction import run_predictions, perform_prediction
+from wf_ml_training import create_models
+from wf_ml_prediction import run_predictions
 
 data = pd.read_csv("data_processed/processed_data.csv")
 removable_features = ['Unnamed: 0', 'the_geom', 'cartodb_id', 'the_geom_webmercator', 'objectid', 'dispatch_date_time', 'dispatch_date', 'dispatch_time', 'hour_', 'dc_key', 'location_block', 'ucr_general', 'text_general_code', 'point_x', 'point_y']
@@ -25,9 +25,6 @@ training_data.to_csv("data_processed/training_data.csv")
 test_X.to_csv("data_processed/testing_data.csv")
 
 create_models(train_X, train_y)
-# create_knn_model(train_X, train_y, 8)
-# create_knn_model(train_X, train_y, 10)
-# create_knn_model(train_X, train_y, 12)
 
 performance = [["Model", "Accuracy", "Precision", "F1-score"]]
 
@@ -39,13 +36,6 @@ for model, pred in predictions.items():
         precision_score(test_y, pred, average='micro'),
         f1_score(test_y, pred, average='micro')
                         ])
-# knn_8_prediction = perform_prediction(test_y, "./models/knn_model_8.pkl")
-# performance.append([
-#         "knn_8",
-#         accuracy_score(test_y, knn_8_prediction, normalize=True),
-#         precision_score(test_y, knn_8_prediction, average='micro'),
-#         f1_score(test_y, knn_8_prediction, average='micro')
-#                         ])
 
 eval_dir = "./evaluation"
 if not os.path.exists(eval_dir):

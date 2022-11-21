@@ -5,8 +5,8 @@ from sklearn.metrics import accuracy_score
 from sklearn.metrics import precision_score
 from sklearn.metrics import f1_score
 from sklearn.model_selection import train_test_split
-from wf_ml_training import create_models
-from wf_ml_prediction import perform_prediction
+from wf_ml_training import create_models, create_knn_model, create_rf_model
+from wf_ml_prediction import run_predictions, perform_prediction
 
 data = pd.read_csv("data_processed/processed_data.csv")
 removable_features = ['Unnamed: 0', 'the_geom', 'cartodb_id', 'the_geom_webmercator', 'objectid', 'dispatch_date_time', 'dispatch_date', 'dispatch_time', 'hour_', 'dc_key', 'location_block', 'ucr_general', 'text_general_code', 'point_x', 'point_y']
@@ -16,32 +16,36 @@ features = [ft for ft in features if ft not in removable_features]
 y = data["crime_code"]
 
 X = data[features]
+
+# 80% training data, 20% test data
 train_X, test_X, train_y, test_y = train_test_split(X, y, random_state=0, test_size=0.2)
+training_data = pd.concat([train_X, train_y], axis=1)
+
+training_data.to_csv("data_processed/training_data.csv")
+test_X.to_csv("data_processed/testing_data.csv")
 
 create_models(train_X, train_y)
+# create_knn_model(train_X, train_y, 8)
+# create_knn_model(train_X, train_y, 10)
+# create_knn_model(train_X, train_y, 12)
 
 performance = [["Model", "Accuracy", "Precision", "F1-score"]]
 
-sgd_prediction = perform_prediction(test_X, "./models/sgd_model.pkl")
-performance.append(["SGD",
-                   accuracy_score(test_y, sgd_prediction, normalize=True),
-                   precision_score(test_y, sgd_prediction, average='micro'),
-                    f1_score(test_y, sgd_prediction, average='micro')
-                    ])
-
-knn_prediction = perform_prediction(test_X, "./models/knn_model.pkl")
-performance.append(["KNN",
-                   accuracy_score(test_y, knn_prediction, normalize=True),
-                   precision_score(test_y, knn_prediction, average='micro'),
-                    f1_score(test_y, knn_prediction, average='micro')
-                    ])
-
-rf_prediction = perform_prediction(test_X, "./models/rf_model.pkl")
-performance.append(["Random Forest",
-                   accuracy_score(test_y, rf_prediction, normalize=True),
-                   precision_score(test_y, rf_prediction, average='micro'),
-                    f1_score(test_y, rf_prediction, average="micro")
-                    ])
+predictions = run_predictions(test_X)
+for model, pred in predictions.items():
+    performance.append([
+        model,
+        accuracy_score(test_y, pred, normalize=True),
+        precision_score(test_y, pred, average='micro'),
+        f1_score(test_y, pred, average='micro')
+                        ])
+# knn_8_prediction = perform_prediction(test_y, "./models/knn_model_8.pkl")
+# performance.append([
+#         "knn_8",
+#         accuracy_score(test_y, knn_8_prediction, normalize=True),
+#         precision_score(test_y, knn_8_prediction, average='micro'),
+#         f1_score(test_y, knn_8_prediction, average='micro')
+#                         ])
 
 eval_dir = "./evaluation"
 if not os.path.exists(eval_dir):

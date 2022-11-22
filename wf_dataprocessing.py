@@ -1,11 +1,10 @@
 import pandas as pd
 from sklearn.compose import make_column_transformer
 from sklearn.impute import KNNImputer
-from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing import MinMaxScaler
 
-# Fields metadata - https://cityofphiladelphia.github.io/carto-api-explorer/#incidents_part1_part2
+
 def processing(data):
     date_column = pd.to_datetime(data["dispatch_date"])
     data["dispatch_day_name"] = date_column.dt.day_name()
@@ -21,10 +20,7 @@ def processing(data):
     longitude_imputer = KNNImputer(n_neighbors=5)
     data["lng"] = longitude_imputer.fit_transform(data["lng"].to_frame())
 
-    le = LabelEncoder()
-    data["crime_code"] = le.fit_transform(data["text_general_code"])
-
-    for feature in ["dispatch_day", "dispatch_month", "dispatch_time_seconds"]:
+    for feature in ["dispatch_day", "dispatch_time_seconds"]:
         min_max_scaler = MinMaxScaler()
         data[feature] = min_max_scaler.fit_transform(data[feature].to_frame())
 

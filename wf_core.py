@@ -1,5 +1,5 @@
 from wf_dataprocessing import processing
-import wf_visualization
+from wf_visualization import summary_statistics, correlation, draw_plots
 
 import pandas as pd
 import os
@@ -12,6 +12,6 @@ if not os.path.exists(outdir):
     os.mkdir(outdir)
 data.to_csv("data_processed/processed_data.csv")
 
-# summary_statistics(data)
-# correlation(data)
-# scatter_plots(data)
+summary_statistics(data)
+correlation(data)
+draw_plots(data)

@@ -3,9 +3,9 @@ import os
 import pandas as pd
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import precision_score
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, TimeSeriesSplit
 from wf_ml_training import create_models
-from wf_ml_prediction import run_predictions
+from wf_ml_prediction import run_predictions, perform_prediction
 
 data = pd.read_csv("data_processed/processed_data.csv")
 removable_features = ['Unnamed: 0', 'the_geom', 'cartodb_id', 'the_geom_webmercator', 'objectid', 'dispatch_date_time',
@@ -29,6 +29,9 @@ create_models(train_X, train_y)
 
 performance = [["Model", "Accuracy", "Precision"]]
 
+# pred = perform_prediction(test_X, "./models/knn_model_8.pkl")
+# print(accuracy_score(test_y, pred, normalize=True))
+# print(precision_score(test_y, pred, average='macro'))
 predictions = run_predictions(test_X)
 for model, pred in predictions.items():
     performance.append([

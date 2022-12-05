@@ -1,9 +1,7 @@
-import pandas as pd
 import numpy
 import os
 import matplotlib.pyplot as plt
 
-# quantitative_features = ["replies_count", "retweets_count", "likes_count"]
 quantitative_features = ["lat", "lng", "dispatch_time_seconds"]
 
 def summary_statistics(data):
@@ -15,7 +13,7 @@ def summary_statistics(data):
         print("Median: ", data[ft].median())
         rows.append([ft, min(data[ft]), max(data[ft]), data[ft].median()])
 
-    rows.append([])
+    rows.append([""]*4)
 
     rows.append(["Features", "Number of categories", "Most frequent", "Least frequent"])
     counts = data["dispatch_month"].value_counts()
@@ -27,7 +25,13 @@ def summary_statistics(data):
     numpy.savetxt('data_processed/summary.txt', numpy.matrix(rows), fmt='%s')
 
 def correlation(data):
-    print(data[quantitative_features].corr())
+    df = data[quantitative_features].corr()
+    # df.columns = quantitative_features
+    # df.index = quantitative_features
+    # numpy.savetxt('data_processed/correlations.txt', df.values, fmt='%d')
+    with open('data_processed/correlations.txt', 'w') as f:
+        dfAsString = df.to_string()
+        f.write(dfAsString)
 
 def draw_plots(data):
     outdir = './visuals'
@@ -37,23 +41,29 @@ def draw_plots(data):
     fig, ax = plt.subplots()
     ax.set(title="Latitude vs Longitude", xlabel="Latitude", ylabel="Longitude")
     ax.scatter(data["lat"], data["lng"])
-    ax.legend()
     fig.savefig("visuals/latANDlng.png")
 
     fig, ax = plt.subplots()
     ax.set(title="Latitude vs dispatch_time_seconds", xlabel="Latitude", ylabel="dispatch_time_seconds")
     ax.scatter(data["lat"], data["dispatch_time_seconds"])
-    ax.legend()
     fig.savefig("visuals/latANDdispatch_time_seconds.png")
 
     fig, ax = plt.subplots()
     ax.set(title="Longitude vs dispatch_time_seconds", xlabel="Longitude", ylabel="dispatch_time_seconds")
     ax.scatter(data["lng"], data["dispatch_time_seconds"])
-    ax.legend()
     fig.savefig("visuals/lngANDdispatch_time_seconds.png")
 
     fig, ax = plt.subplots()
-    ax.set(title="Histogram of dispatch_month")
+    ax.set(title="ucr_general vs dispatch_hour", xlabel="ucr_general", ylabel="dispatch_hour")
+    ax.scatter(data["ucr_general"], data["dispatch_hour"])
+    fig.savefig("visuals/ucr_generalANDdispatch_hour.png")
+
+    fig, ax = plt.subplots()
+    ax.set(title="ucr_general vs Longitude", xlabel="ucr_general", ylabel="Longitude")
+    ax.scatter(data["ucr_general"], data["lng"])
+    fig.savefig("visuals/ucr_generalANDLongitude.png")
+
+    fig, ax = plt.subplots()
+    ax.set(title="Histogram of dispatch_month", xlabel="Month", ylabel="Count")
     ax.hist(data["dispatch_month"])
-    ax.legend()
     fig.savefig("visuals/dispatch_month_hist.png")

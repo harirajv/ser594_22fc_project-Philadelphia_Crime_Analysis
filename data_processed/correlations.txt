@@ -1,0 +1,4 @@
+                            lat       lng  dispatch_time_seconds
+lat                    1.000000  0.630903               0.010997
+lng                    0.630903  1.000000              -0.001834
+dispatch_time_seconds  0.010997 -0.001834               1.000000

@@ -3,9 +3,9 @@ import os
 import pandas as pd
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import precision_score
-from sklearn.model_selection import train_test_split, TimeSeriesSplit
+from sklearn.model_selection import TimeSeriesSplit
 from wf_ml_training import create_models
-from wf_ml_prediction import run_predictions, perform_prediction
+from wf_ml_prediction import run_predictions
 
 data = pd.read_csv("data_processed/processed_data.csv")
 

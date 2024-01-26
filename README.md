@@ -17,3 +17,5 @@ The project aims to forecast crime rates in Philadelphia by considering location
 The Crime Incidents data was downloaded from [OpenDataPhilly](https://www.opendataphilly.org/dataset/crime-incidents).
 
 ![Alt text](visuals/geo_4.png)
+
+![Alt text](visuals/weekday.png)
